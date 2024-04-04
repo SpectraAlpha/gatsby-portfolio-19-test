@@ -1,10 +1,15 @@
 name: Gatsby Publish
 
-
 on:
   push:
     branches:
-      - main  # Set the branch you want to deploy from
+      - main
+  workflow_dispatch:  # Manual run button
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
 
 jobs:
   build:
@@ -17,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'  # Use the Node.js version you need
+          node-version: '18'
 
       - name: Install dependencies
         run: npm install
@@ -26,8 +31,9 @@ jobs:
         run: npm run build
 
       - name: Deploy to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Deploy only on push to main
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.test }}
-          publish_dir: ./public  # Specify the directory where Gatsby generates the static files
-          force_orphan: true  # Ensures only the `public` directory is pushed to the `gh-pages` branch
+          publish_dir: ./public
+          force_orphan: true
